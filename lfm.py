@@ -34,6 +34,33 @@ def Normalize(x,rows,cols):
             x[i] = x[i]-av
     return x
 
+def SGD(data,rows,cols):
+    
+
+    n_factors = 10  
+    alpha = .01 
+    n_epochs = 10 
+
+    
+    p = np.random.normal(0, .1, (rows, n_factors))
+    q = np.random.normal(0, .1, (cols, n_factors))
+
+    
+    for _ in range(n_epochs):
+        for u in range(rows):
+            for i in range(cols):
+                if data[u][i]!=0:
+                    r_ui=data[u][i]
+                    err = r_ui - np.dot(p[u], q[i])    
+                    p[u] += alpha * err * q[i]
+                    q[i] += alpha * err * p[u]
+    return p,q
+
+
+def estimate(u, i):
+    return np.dot(p[u], q[i])
+
+
 def Predict():
     #concepts=20
     #presetting the number of concepts we desire to have in the decompositons.
@@ -57,4 +84,14 @@ def Predict():
         for j in range(cols):
             if l[i][j]==99:
                 l[i][j]=0
-    
+    start=time.time()
+    p,q=SGD(l,rows,cols)
+    end=time.time()
+    print("Time taken for prediction"),
+    print(end-start)
+    ln=np.zeros((rows,cols))
+    for i in range(rows):
+        for j in range(cols):
+            ln[i][j]=np.dot(p[i],q[j])
+    print(ERRORS(l,ln,rows,cols))
+Predict()
