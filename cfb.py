@@ -15,7 +15,7 @@ def ERRORS(l,ln,rows,cols):
         for j in range(cols):
             if l[i][j]!=0:
                 ss+=(l[i][j]-ln[i][j])**2
-                s+=l[i][j]-ln[i][j]
+                s+=abs(l[i][j]-ln[i][j])
                 count+=1
     p.append(abs(mt.sqrt(ss)/count))
     p.append(abs(s/count))
@@ -114,12 +114,32 @@ def Predict():
             y=l[:,j:j+1].T
             sim[i][j]=PearsonCorr(x,y)
             sim[j][i]=sim[i][j]
+    ln=np.zeros((rows,cols))
     lp=np.zeros((rows,cols))
     m=AvRating(l,rows,cols)
     sumsim=np.sum(sim)
-    movieavs=[AvMovieRating(l[:,j:j+1],rows) for j in range(cols)]
+    
+
+    #start without baseline
+    start=time.time()
+    for i in range(rows):
+        for j in range(cols):
+            s=0
+            for k in range(cols):
+                if l[i][k]!=0:
+                    s+=sim[j][k]*l[i][k]
+            ln[i][j]=s/sumsim
+    end=time.time()
+    print("time for predicitng svd without baseline: "),
+    print(end-start)
+    print(ERRORS(l,ln,rows,cols))
+    
+
+    #here we start with baseline
+    '''movieavs=[AvMovieRating(l[:,j:j+1],rows) for j in range(cols)]
     useravs=[AvUserRating(l[i],cols) for i in range(rows)]
     av=TotalAv(l,rows,cols)
+    start=time.time()
     for i in range(rows):
         print(i)
         for j in range(cols):
@@ -127,9 +147,9 @@ def Predict():
             for k in range(cols):
                 s+=sim[j][k]*(l[i][k]-(av+movieavs[k]+useravs[i]))
             lp[i][j]=s/sumsim
-    print(ERRORS(l,lp,rows,cols))
-start=time.time()
+    end=time.time()
+    print("time for predicitng svd with baseline: "),
+    print(end-start)
+    print(ERRORS(l,lp,rows,cols))'''
+
 Predict()
-end=time.time()
-print("time taken for prediction :"),
-print(end-start)
