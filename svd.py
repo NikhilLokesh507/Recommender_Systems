@@ -65,17 +65,50 @@ def Predict():
     p=np.matmul(l,lt)
     E,V=np.linalg.eigh(ldash)
     ind = (np.argsort(E))[::-1]
+
+    #90%
     Ek = E[ind]
-    V=V.T
+    s=sum(Ek)
+    E=[]
+    s1=0
+    c=0
+    for x in Ek:
+        s1+=x
+        c+=1
+        E.append(x)
+        if s1>0.9*s:
+            break
+    
     V=V[ind]
+    print("the value of c is"),
+    print(c)
+    V=V[:,:c]
+    E = np.diag(np.sqrt(E))
+    print(l.shape)
+    print(V.shape)
+    print(E.shape)
+    U = np.matmul(np.matmul(l,V),np.linalg.inv(E)) # M*V*inv(sigma) = U
+    V=V.T
+
+    #this part of the code if for without 90% energy
+    '''V=V[ind]
     E = np.diag(np.sqrt(E))
     U = np.matmul(np.matmul(l,V),np.linalg.inv(E)) # M*V*inv(sigma) = U
+    V=V.T
     U=U[:,:concepts]
+    print(U.shape)
     V=V[:concepts,:]
-    E=E[:concepts,:concepts]
+    print(V.shape)
+    E=E[:concepts,:concepts]'''
+    #concludes without 90%
+
+
     ln=np.matmul(np.matmul(U,E),V)
-    #print(ln.shape)
+
     print(ERRORS(l,ln,rows,cols))
+    
+
+
 
 start=time.time()
 Predict()
