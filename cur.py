@@ -20,6 +20,20 @@ def ERRORS(l,ln,rows,cols):
     p.append(abs(s/count))
     return p
 
+def ERRORSw(l,ln,rows,cols):
+    p=[]
+    ss=0
+    s=0
+    count=0
+    for i in range(rows):
+        for j in range(cols):
+            if l[i][j]!=0:
+                ss+=(l[i][j]-ln[i][j])**2
+                s+=l[i][j]-ln[i][j]
+                count+=1
+    p.append(abs(mt.sqrt(ss)/count)/1e+04)
+    p.append(abs(s/count)/1e+04)
+    return p
 
 def Normalize(x,rows,cols):
     s=0
@@ -99,9 +113,36 @@ def Predict():
             W[i][j]=l[x[i]][y[j]]
     x, s, y = np.linalg.svd(W)
     sn=np.power(s,2)
-    sn=1/sn
+    sn=np.power(sn,-1)
+    sn=np.diag(sn)
+    U=np.matmul(np.matmul(y.T,sn),x.T)
+    el=np.matmul(np.matmul(C,U),R)
+    print(ERRORSw(l,el,rows,cols))
+
+    #this is for 90% energy calculation
+    '''s1=[]
+    suml=0
+    c=0
+    sums=sum(sn)
+    for h in sn:
+        suml+=h
+        c+=1
+        s1.append(h)
+        if suml>0.9*sums:
+            break
+    x=x[:,:c]
+    y=y[:c,:]
+    sn=s1
+    sn=np.power(sn,-1)
     sn=np.diag(sn)
     U=np.matmul(np.matmul(y.T,sn),x.T)
     el=np.matmul(np.matmul(C,U),R)
     print(ERRORS(l,el,rows,cols))
+    #90 percent energy prediction concludes
+    '''
+
+
+start=time.time()
 Predict()
+end=time.time()
+print(end-start)
